@@ -2,7 +2,7 @@
 
 This repository contains code for token classification with BERT-like models. 
 
-- BERT fine-tuning for token classification
+- BERT fine-tuning for span classification
 - Evaluation
-- Usage examples
+- Usage examples: [span_classification_bert.ipynb](span_classification_bert.ipynb)
 
