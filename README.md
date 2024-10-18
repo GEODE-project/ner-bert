@@ -7,7 +7,7 @@ This repository contains code for token classification with BERT-like models.
 - [camembert_span_classification.ipynb](camembert_span_classification.ipynb): Usage examples.
 
 
-The fine-tuned GeoEDdA CamemBERT model is available on the HuggingFace Hub: [https://huggingface.co/GEODE/](https://huggingface.co/GEODE/) 🤗
+The fine-tuned GeoEDdA CamemBERT model is available on the HuggingFace Hub: [hhttps://huggingface.co/GEODE/camembert-base-edda-span-classification](https://huggingface.co/GEODE/camembert-base-edda-span-classification) 🤗
 
 For training and evaluation we used the GeoEDdA dataset available also on HuggingFace:
 [https://huggingface.co/datasets/GEODE/GeoEDdA](https://huggingface.co/datasets/GEODE/GeoEDdA) 🤗
