@@ -29,7 +29,7 @@ def get_data(d):
 
 
 
-def get_header(meta):
+def get_tei_header(meta):
     header = "<TEI>"
     header += "<teiHeader>"
     header += "<fileDesc>"
@@ -53,7 +53,7 @@ def spacy_to_xml(doc, meta=None):
     if meta is None:
         xml = "<text>" # <text uid="EDdA_1_6" book="EDdA" author=":Dumarsais5:" domains=":Philosophie:">
     else:
-        xml = get_header(meta)
+        xml = get_tei_header(meta)
         xml += "<text "
         for key, value in meta.items():
             if key == "head":
