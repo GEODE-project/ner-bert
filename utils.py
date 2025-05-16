@@ -28,6 +28,45 @@ def get_data(d):
     return data
 
 
+def get_teicorpus_header(meta):
+    #header = '<?xml version="1.0" encoding="UTF-8"?>'
+    header = "<teiCorpus>"
+    header += "<teiHeader>"
+    header += "<fileDesc>"
+    header += "<titleStmt>"
+    header += f"<title>{meta['book']}</title>"
+    header += "<respStmt>"
+    header += "<resp>Digitized by</resp>"
+    header += "<orgName>University of Chicago Library</orgName>"
+    header += "<resp>Published by</resp>"
+    header += "<orgName>ARTFL</orgName>"
+    header += "<resp>Annotated and encoded by</resp>"
+    header += "<orgName>GEODE project</orgName>"
+    header += "</respStmt>"
+    header += "</titleStmt>"
+    header += "<publicationStmt>"
+    header += "<distributor>"
+    header += "<orgName>GEODE project</orgName>"
+    header += "</distributor>"
+    header += "</publicationStmt>"
+    header += "<sourceDesc>"
+    header += "<bibl>"
+    header += f"<title>L'Encyclopédie T{meta['tome']}</title>"
+    header += "<author>Collective</author>"
+    header += "<creation>"
+    header += "<date>1752</date>"
+    header += "</creation>"
+    header += "</bibl>"
+    header += "</sourceDesc>"
+    header += "</fileDesc>"
+    header += "</teiHeader>"
+    return header
+
+
+def get_teicorpus_footer():
+    footer = "</teiCorpus>"
+    return footer
+
 
 def get_tei_header(meta):
     header = "<TEI>"
@@ -49,6 +88,11 @@ def get_tei_header(meta):
     return header
 
 
+def get_tei_footer():
+    footer = "</TEI>"
+    return footer
+
+
 def spacy_to_xml(doc, meta=None):
     if meta is None:
         xml = "<text>" # <text uid="EDdA_1_6" book="EDdA" author=":Dumarsais5:" domains=":Philosophie:">
@@ -56,7 +100,7 @@ def spacy_to_xml(doc, meta=None):
         xml = get_tei_header(meta)
         xml += "<text "
         for key, value in meta.items():
-            if key == "head":
+            if key == "head" or key == "volume":
                 continue
             xml += f"{key}='{value}' "
         xml += ">"
@@ -67,7 +111,9 @@ def spacy_to_xml(doc, meta=None):
         for w in sent:
             xml += f"<w lemma='{w.lemma_}' pos='{w.pos_}' start='{w.idx}' end='{w.idx + len(w.text)}'>{w.text}</w>"
         xml += "</s>"
-    xml += "</body></text></TEI>"
+    xml += '</body><milestone unit="article"/></text>'
+    if meta is not None:
+        xml += get_tei_footer()
     return xml
 
 
