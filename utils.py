@@ -27,3 +27,103 @@ def get_data(d):
         data.append({'tokens': [token['text'] for token in content['tokens']], 'tags_id': content['ids']})
     return data
 
+
+
+def get_header(meta):
+    header = "<TEI>"
+    header += "<teiHeader>"
+    header += "<fileDesc>"
+    header += "<titleStmt>"
+    header += f"<title>{meta['head']}</title>"
+    header += "</titleStmt>"
+    header += "<publicationStmt>"
+    header += "<p>Annotated with Spacy (fr_dep_news_trf) and https://huggingface.co/GEODE/camembert-base-edda-span-classification by project GEODE</p>"
+    header += "</publicationStmt>"
+    header += "<sourceDesc>"
+    header += "<bibl>"
+    header += f"<author>{meta['author'][1:-1]}</author>"
+    header += "</bibl>"
+    header += "</sourceDesc>"
+    header += "</fileDesc>"
+    header += "</teiHeader>"
+    return header
+
+
+def spacy_to_xml(doc, meta=None):
+    if meta is None:
+        xml = "<text>" # <text uid="EDdA_1_6" book="EDdA" author=":Dumarsais5:" domains=":Philosophie:">
+    else:
+        xml = get_header(meta)
+        xml += "<text "
+        for key, value in meta.items():
+            if key == "head":
+                continue
+            xml += f"{key}='{value}' "
+        xml += ">"
+        
+    xml += "<body>"
+    for sent in doc.sents:
+        xml += "<s>"
+        for w in sent:
+            xml += f"<w lemma='{w.lemma_}' pos='{w.pos_}' start='{w.idx}' end='{w.idx + len(w.text)}'>{w.text}</w>"
+        xml += "</s>"
+    xml += "</body></text></TEI>"
+    return xml
+
+
+def merge_annotations(root, annotations):
+
+    for ann in annotations:
+        start = str(ann['start'])
+        end = str(ann['end'])
+        word = ann['word']
+        tag = ann['entity_group']
+        #print(f"start: {start}, end: {end}, word: {word}, tag: {tag}")
+        matches = root.xpath('//w[@start="'+start+'" and @end="'+end+'"]')
+
+        if not matches:
+            m = root.xpath('//w[@start="'+start+'"]')
+            if not m:
+                print("No match found.")
+            elif len(matches) > 1:
+                raise ValueError("Multiple matches found.")
+            else:
+                w = m[0]
+                w.set("type", "B-"+tag)
+                br = False
+                # get m sibling
+                for sibling in w.itersiblings():
+                    if sibling.get("end") == end:
+                        sibling.set("type", "E-"+tag)
+                        br = True
+                        break
+                    else:
+                        if sibling.get("end") < end and sibling.get("start") > start:
+                            sibling.set("type", "I-"+tag)
+
+                if not br:
+                    m = root.xpath('//w[@end="'+end+'"]') 
+                    if not m:
+                        print("No match found.")
+                    elif len(matches) > 1:
+                        raise ValueError("Multiple matches found.")
+                    else:
+                        w = m[0]
+                        w.set("type", "E-"+tag)
+                        for sibling in w.itersiblings(preceding=True):
+                            if sibling.get("end") < end and sibling.get("start") > start:
+                                sibling.set("type", "I-"+tag)
+                # I ?
+                # E ?
+
+        elif len(matches) > 1:
+            raise ValueError("Multiple matches found.")
+        else:
+            w = matches[0]
+            w.set("type", "S-"+tag)
+            #print("Unique match:")
+
+        # parse the xml with xpath to find the w element with the corresponding start and end of the word (potentially multiple)
+
+        #xml = xml[:start] + f"<{tag}>" + xml[start:end] + f"</{tag}>" + xml[end:]
+    return root
