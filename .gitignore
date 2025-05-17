@@ -163,3 +163,5 @@ cython_debug/
 
 models/
 tmp/
+txm/.DS_Store
+.DS_Store
