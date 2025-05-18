@@ -1,4 +1,4 @@
-
+import html
 
 def filter_tags(sentence, tagset, remove_nested=False):
     result = [['O']] * len(sentence['tokens'])
@@ -26,6 +26,10 @@ def get_data(d):
     for content in d:
         data.append({'tokens': [token['text'] for token in content['tokens']], 'tags_id': content['ids']})
     return data
+
+
+def escape(text):
+    return html.escape(str(text))
 
 
 def get_teicorpus_header(meta):
@@ -81,14 +85,14 @@ def get_tei_header(meta):
     header += "<teiHeader>"
     header += "<fileDesc>"
     header += "<titleStmt>"
-    header += f"<title>{meta['head']}</title>"
+    header += f"<title>{escape(meta['head'])}</title>"
     header += "</titleStmt>"
     header += "<publicationStmt>"
     header += "<p>Annotated with Spacy (fr_dep_news_trf) and https://huggingface.co/GEODE/camembert-base-edda-span-classification by project GEODE</p>"
     header += "</publicationStmt>"
     header += "<sourceDesc>"
     header += "<bibl>"
-    header += f"<author>{meta['author'][1:-1]}</author>"
+    header += f"<author>{escape(meta['author'])}</author>"
     header += "</bibl>"
     header += "</sourceDesc>"
     header += "</fileDesc>"
@@ -110,14 +114,14 @@ def spacy_to_xml(doc, meta=None):
         for key, value in meta.items():
             if key == "head" or key == "volume":
                 continue
-            xml += f"{key}='{value}' "
+            xml += f"{escape(key)}='{escape(value)}' "
         xml += ">"
-        
+
     xml += "<body>"
     for sent in doc.sents:
         xml += "<s>"
         for w in sent:
-            xml += f"<w lemma='{w.lemma_}' pos='{w.pos_}' start='{w.idx}' end='{w.idx + len(w.text)}'>{w.text}</w>"
+            xml += f"<w lemma='{escape(w.lemma_)}' pos='{w.pos_}' start='{w.idx}' end='{w.idx + len(w.text)}'>{escape(w.text)}</w>"
         xml += "</s>"
     xml += '</body><milestone unit="article"/></text>'
     if meta is not None:
@@ -138,7 +142,8 @@ def merge_annotations(root, annotations):
         if not matches:
             m = root.xpath('//w[@start="'+start+'"]')
             if not m:
-                print("No match found.")
+                #print("No match found.")
+                pass
             elif len(matches) > 1:
                 raise ValueError("Multiple matches found.")
             else:
@@ -158,7 +163,8 @@ def merge_annotations(root, annotations):
                 if not br:
                     m = root.xpath('//w[@end="'+end+'"]') 
                     if not m:
-                        print("No match found.")
+                        #print("No match found.")
+                        pass
                     elif len(matches) > 1:
                         raise ValueError("Multiple matches found.")
                     else:
